@@ -1,0 +1,3 @@
+Customtkinter
+Pillow
+numpy
