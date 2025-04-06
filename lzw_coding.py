@@ -49,7 +49,7 @@ def lzw_decompress(compressed_data):
 
 # Process Image (Convert to grayscale and reduce color depth if necessary)
 def process_image_for_compression(img):
-    img = img.quantize(colors=256)  # Limit to 256 colors
+    img = img.convert('L')  # Convert to grayscale
     pixel_data = list(img.getdata())  # Flatten pixel data into a list
     return pixel_data, img
 

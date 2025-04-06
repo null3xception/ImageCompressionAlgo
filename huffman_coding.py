@@ -6,10 +6,9 @@ import file_handling
 
 
 class node:
-
     def __init__(self, frequency, symbol, left=None, right=None):
         self.frequency = frequency
-        self.symbol = symbol
+        self.symbol = symbol  # Now, symbol is a byte, not a string
         self.left = left
         self.right = right
         self.huffman_direction = ''
@@ -49,8 +48,7 @@ def get_merged_huffman_tree(byte_to_frequency):
         right = heapq.heappop(huffman_tree)
         left.huffman_direction = "0"
         right.huffman_direction = "1"
-        merged_node = node(left.frequency + right.frequency,
-                           left.symbol + right.symbol, left, right)
+        merged_node = node(left.frequency + right.frequency, b'', left, right)  # Empty symbol for merged node
         heapq.heappush(huffman_tree, merged_node)
     return huffman_tree[0]
 
@@ -106,18 +104,17 @@ def calculate_psnr(original_bit_string, decompressed_bit_string):
     return psnr
 
 def decompress(compressed_image_bit_string, original_bit_string):
-    start_time = time.time()  # Start measuring time
-    decompressed_image_bit_string = ""
-    current_code = ""
+    start_time = time.time()
+    decompressed_image_bit_string = []
+    current_code = ''
+    code_to_byte = {code: byte for byte, code in huffman_codes.items()}  # Reverse lookup for faster matching
     for bit in compressed_image_bit_string:
         current_code += bit
-        for byte, code in huffman_codes.items():
-            if current_code == code:
-                decompressed_image_bit_string += byte
-                current_code = ""
-    
-    end_time = time.time()  # End measuring time
+        if current_code in code_to_byte:
+            decompressed_image_bit_string.append(code_to_byte[current_code])
+            current_code = ''
+    decompressed_image_bit_string = ''.join(decompressed_image_bit_string)
+    end_time = time.time()
     decompression_time = (end_time - start_time) * 1000
     psnr = calculate_psnr(original_bit_string, decompressed_image_bit_string)
-
     return decompressed_image_bit_string, decompression_time, psnr
