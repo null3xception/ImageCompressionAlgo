@@ -39,3 +39,142 @@ here is the biggest because not just we combined the two compressed binary files
 as well unlike the Huffman-LZW which is corrupted or incomplete. Hence, we decompressed the image like how it used to but the only downside is that
 it is not optimal for compressing into a smaller size. Recommendations for the research? Maybe if we could find a way to optimize the compression size
 of our modified algorithm, then that would be good.  
+
+
+# CHANGES (if you want RGB ang output)
+from lzw_coding import lzw_compress, lzw_decompress, calculate_psnr, load_uploaded_image, save_decompressed_image, reconstruct_rgb_image
+def lzwCompress(progress_callback):
+    global uploadedImagePath
+
+    image_path = uploadedImagePath
+    (r_channel, g_channel, b_channel), original_image = load_uploaded_image(image_path)
+
+    # Simulated progress bar
+    for i in range(100):
+        progress_callback(i, "LZW")
+        time.sleep(0.01)
+
+    # Compress each channel
+    start_time = time.time()
+    compressed_r = lzw_compress(r_channel, 4096)
+    compressed_g = lzw_compress(g_channel, 4096)
+    compressed_b = lzw_compress(b_channel, 4096)
+    compression_time = time.time() - start_time
+
+    # Save compressed data
+    with open("IO/Outputs/lzw_compressed_image.bin", "wb") as f:
+        for code in compressed_r + [-1] + compressed_g + [-1] + compressed_b:
+            f.write(code.to_bytes(2, byteorder="big", signed=True))
+
+    total_compressed = len(compressed_r) + len(compressed_g) + len(compressed_b)
+    compressed_size_bytes = total_compressed * 2
+    compressed_size = f"{compressed_size_bytes} Bytes" if compressed_size_bytes < 1024 else \
+                      f"{compressed_size_bytes / 1024:.2f} KB" if compressed_size_bytes < 1024**2 else \
+                      f"{compressed_size_bytes / (1024 ** 2):.2f} MB"
+
+    # Update UI Labels
+    lzwSizeLabel.configure(text=f"{compressed_size}")
+    lzwRatioLabel.configure(text=f"{total_compressed / (len(r_channel) * 3):.4f}%")
+    lzwTimeLabel.configure(text=f"{compression_time:.2f} ms")
+
+    return (compressed_r, compressed_g, compressed_b), original_image
+
+
+def lzwCompressNoCallBack():
+    global uploadedImagePath
+
+    image_path = uploadedImagePath
+    (r_channel, g_channel, b_channel), original_image = load_uploaded_image(image_path)
+
+    # Compress each channel
+    start_time = time.time()
+    compressed_r = lzw_compress(r_channel, 4096)
+    compressed_g = lzw_compress(g_channel, 4096)
+    compressed_b = lzw_compress(b_channel, 4096)
+    compression_time = time.time() - start_time
+
+    # Save compressed data
+    with open("IO/Outputs/lzw_compressed_image.bin", "wb") as f:
+        for code in compressed_r + [-1] + compressed_g + [-1] + compressed_b:
+            f.write(code.to_bytes(2, byteorder="big", signed=True))
+
+    total_compressed = len(compressed_r) + len(compressed_g) + len(compressed_b)
+    compressed_size_bytes = total_compressed * 2
+    compressed_size = f"{compressed_size_bytes} Bytes" if compressed_size_bytes < 1024 else \
+                      f"{compressed_size_bytes / 1024:.2f} KB" if compressed_size_bytes < 1024**2 else \
+                      f"{compressed_size_bytes / (1024 ** 2):.2f} MB"
+
+    # Update UI Labels
+    lzwSizeLabel.configure(text=f"{compressed_size}")
+    lzwRatioLabel.configure(text=f"{total_compressed / (len(r_channel) * 3):.4f}%")
+    lzwTimeLabel.configure(text=f"{compression_time:.2f} ms")
+
+    return (compressed_r, compressed_g, compressed_b), original_image
+
+def lzwDecompress(progress_callback):
+    (compressed_r, compressed_g, compressed_b), original_image = lzwCompressNoCallBack()
+
+    for i in range(100):
+        progress_callback(i, "LZW")
+        time.sleep(0.01)
+
+    start_time = time.time()
+    decoded_r = lzw_decompress(compressed_r.copy(), 4096)
+    decoded_g = lzw_decompress(compressed_g.copy(), 4096)
+    decoded_b = lzw_decompress(compressed_b.copy(), 4096)
+    decompressed_image = reconstruct_rgb_image(decoded_r, decoded_g, decoded_b, original_image.size)
+    decompression_time = time.time() - start_time
+
+    psnr = calculate_psnr(original_image, decompressed_image)
+
+    # Update UI
+    lzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+    lzwPSNRLabel.configure(text=f"{psnr:.2f} dB")
+
+    # Save decompressed image
+    output_path = "IO/Outputs/lzw_decompressed_image.jpg"
+    save_decompressed_image(decompressed_image, output_path)
+
+    lzwDecompressedImage = ctk.CTkImage(
+        light_image=Image.open(output_path),
+        dark_image=Image.open(output_path),
+        size=(250, 250)
+    )
+
+    img_label2.configure(image=lzwDecompressedImage)
+    img_label2.image = lzwDecompressedImage
+    btn2.place_forget()
+
+    return decompressed_image
+
+def lzwDecompressNoCallBack():
+    (compressed_r, compressed_g, compressed_b), original_image = lzwCompressNoCallBack()
+
+    start_time = time.time()
+    decoded_r = lzw_decompress(compressed_r.copy(), 4096)
+    decoded_g = lzw_decompress(compressed_g.copy(), 4096)
+    decoded_b = lzw_decompress(compressed_b.copy(), 4096)
+    decompressed_image = reconstruct_rgb_image(decoded_r, decoded_g, decoded_b, original_image.size)
+    decompression_time = time.time() - start_time
+
+    psnr = calculate_psnr(original_image, decompressed_image)
+
+    # Update UI
+    lzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+    lzwPSNRLabel.configure(text=f"{psnr:.2f} dB")
+
+    # Save decompressed image
+    output_path = "IO/Outputs/lzw_decompressed_image.jpg"
+    save_decompressed_image(decompressed_image, output_path)
+
+    lzwDecompressedImage = ctk.CTkImage(
+        light_image=Image.open(output_path),
+        dark_image=Image.open(output_path),
+        size=(250, 250)
+    )
+
+    img_label2.configure(image=lzwDecompressedImage)
+    img_label2.image = lzwDecompressedImage
+    btn2.place_forget()
+
+    return decompressed_image

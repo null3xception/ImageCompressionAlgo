@@ -42,7 +42,7 @@ def huffmanCompress(progress_callback):
     # Update UI labels
     huffmanSizeLabel.configure(text=f"{compressed_size:.2f} KB")
     huffmanRatioLabel.configure(text=f"{compression_ratio:.4f}%")
-    huffmanTimeLabel.configure(text=f"{compression_time:.2f} ms")
+    huffmanTimeLabel.configure(text=f"{compression_time:.2f} s")
     
     
 def huffmanDecompress(progress_callback):
@@ -87,7 +87,7 @@ def huffmanDecompressNoCallBack():
     img_label1.image = huffmanDecompressedImage
     
     # Update UI labels
-    huffmanDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")  # Display decompression time
+    huffmanDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} s")  # Display decompression time
     huffmanPSNRLabel.configure(text=f"{psnr:.2f} dB")  # Display PSNR value
     btn1.place_forget()
     
@@ -109,9 +109,11 @@ def lzwCompress(progress_callback):
     with open("IO/Outputs/lzw_compressed_image.bin", "wb") as f:
         for code in compressed_data:
             f.write(code.to_bytes(2, byteorder="big"))  # Write each code as 2 bytes
+    
+    end_time = time.time()
 
     # Calculate compressed size
-    compression_time = time.time() - start_time
+    compression_time = end_time - start_time
     compressed_size_bytes = len(compressed_data) * 2  # Assuming each entry takes 2 bytes
     compressed_size = f"{compressed_size_bytes} Bytes" if compressed_size_bytes < 1024 else \
                     f"{compressed_size_bytes / 1024:.2f} KB" if compressed_size_bytes < 1024**2 else \
@@ -120,7 +122,7 @@ def lzwCompress(progress_callback):
     # Update UI Labels
     lzwSizeLabel.configure(text=f"{compressed_size}")
     lzwRatioLabel.configure(text=f"{len(compressed_data) / len(image_data):.4f}%")
-    lzwTimeLabel.configure(text=f"{compression_time:.2f} ms")
+    lzwTimeLabel.configure(text=f"{compression_time:.2f} s")
 
     return compressed_data, original_image
 
@@ -138,18 +140,17 @@ def lzwCompressNoCallBack():
     with open("IO/Outputs/lzw_compressed_image.bin", "wb") as f:
         for code in compressed_data:
             f.write(code.to_bytes(2, byteorder="big"))  # Write each code as 2 bytes
+    end_time = time.time()
 
     # Calculate compressed size
-    compression_time = time.time() - start_time
+    compression_time = end_time - start_time
     compressed_size_bytes = len(compressed_data) * 2  # Assuming each entry takes 2 bytes
-    compressed_size = f"{compressed_size_bytes} Bytes" if compressed_size_bytes < 1024 else \
-                    f"{compressed_size_bytes / 1024:.2f} KB" if compressed_size_bytes < 1024**2 else \
-                    f"{compressed_size_bytes / (1024 ** 2):.2f} MB"
+    compressed_size = f"{compressed_size_bytes / 1024:.2f} KB"
 
     # Update UI Labels
     lzwSizeLabel.configure(text=f"{compressed_size}")
     lzwRatioLabel.configure(text=f"{len(compressed_data) / len(image_data):.4f}%")
-    lzwTimeLabel.configure(text=f"{compression_time:.2f} ms")
+    lzwTimeLabel.configure(text=f"{compression_time:.2f} s")
 
     return compressed_data, original_image
 
@@ -164,7 +165,8 @@ def lzwDecompress(progress_callback):
     decompressed_data = lzw_decompress(compressed_data)
     decompressed_image = Image.new('L', original_image.size)
     decompressed_image.putdata([ord(c) for c in decompressed_data])
-    decompression_time = time.time() - start_time
+    end_time = time.time()
+    decompression_time = end_time - start_time
     
     #print(f"Decompression time: {decompression_time:.2f} seconds")
     
@@ -172,7 +174,7 @@ def lzwDecompress(progress_callback):
     psnr = calculate_psnr(original_image, decompressed_image)
     #print(f"PSNR: {psnr:.2f} dB")
 
-    lzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+    lzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} s")
     lzwPSNRLabel.configure(text=f"{psnr:.2f} dB")
 
     
@@ -208,7 +210,7 @@ def lzwDecompressNoCallBack():
     psnr = calculate_psnr(original_image, decompressed_image)
     #print(f"PSNR: {psnr:.2f} dB")
 
-    lzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+    lzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} s")
     lzwPSNRLabel.configure(text=f"{psnr:.2f} dB")
 
     
@@ -257,7 +259,7 @@ def huffmanLZWCompress(progress_callback):
     # Step 5: Update UI labels
     huffmanLzwSizeLabel.configure(text=f"{compressed_size_kb:.2f} KB")
     huffmanLzwRatioLabel.configure(text=f"{compression_percentage:.4f}%")
-    huffmanLzwTimeLabel.configure(text=f"{compression_time:.2f} ms")
+    huffmanLzwTimeLabel.configure(text=f"{compression_time:.2f} s")
 
 def huffmanLZWDecompress(progress_callback):
     global decompressed_image_bit_string
@@ -285,7 +287,7 @@ def huffmanLZWDecompress(progress_callback):
         file_handling.save_decompressed_image_with_write_image(decompressed_image_bit_string, output_path)
 
         # Step 4: Update UI Labels with decompression time and PSNR
-        huffmanLzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+        huffmanLzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} s")
         huffmanLzwPSNRLabel.configure(text=f"{psnr:.2f} dB")
 
         # Step 5: Load the decompressed image with PIL and handle truncated images
@@ -331,7 +333,7 @@ def huffmanLZWDecompressNoCallBack():
         file_handling.save_decompressed_image_with_write_image(decompressed_image_bit_string, output_path)
 
         # Step 4: Update UI Labels with decompression time and PSNR
-        huffmanLzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+        huffmanLzwDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} s")
         huffmanLzwPSNRLabel.configure(text=f"{psnr:.2f} dB")
 
         # Step 5: Load the decompressed image with PIL and handle truncated images
@@ -386,7 +388,7 @@ def modifiedCompress(progress_callback):
         # Step 5: Update UI labels with compression stats
         modifiedSizeLabel.configure(text=f"{compressed_size_kb:.2f} KB")
         modifiedRatioLabel.configure(text=f"{compression_percentage:.4f}%")
-        modifiedTimeLabel.configure(text=f"{compression_time:.2f} ms")
+        modifiedTimeLabel.configure(text=f"{compression_time:.2f} s")
 
     except Exception as e:
         print(f"Error during Modified compression: {e}")
@@ -420,7 +422,7 @@ def modifiedDecompress(progress_callback):
         file_handling.save_decompressed_image_with_write_imageM(decompressed_image_bit_string, output_path)
 
         # Step 5: Update UI Labels with decompression time and PSNR
-        modifiedDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+        modifiedDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} s")
         modifiedPSNRLabel.configure(text=f"{psnr:.2f} dB")
 
         # Step 6: Load the decompressed image with PIL and handle truncated images
@@ -468,7 +470,7 @@ def modifiedDecompressNoCallBack():
         file_handling.save_decompressed_image_with_write_imageM(decompressed_image_bit_string, output_path)
 
         # Step 5: Update UI Labels with decompression time and PSNR
-        modifiedDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} ms")
+        modifiedDecompressedTimeLabel.configure(text=f"{decompression_time:.2f} s")
         modifiedPSNRLabel.configure(text=f"{psnr:.2f} dB")
 
         # Step 6: Load the decompressed image with PIL and handle truncated images

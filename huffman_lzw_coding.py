@@ -144,7 +144,7 @@ def huffman_lzw_compress(image_bit_string):
     compressed_image_bit_stringHZ = huffman_compress(lzw_bit_string)
 
     end_time = time.time()
-    compression_time = (end_time - start_time) * 1000
+    compression_time = (end_time - start_time) 
 
     original_size = len(image_bit_string) * 8
     compressed_size = len(compressed_image_bit_stringHZ)
@@ -167,7 +167,7 @@ def huffman_lzw_decompress(compressed_image_bit_string, original_bit_string):
     decompressed_image_bit_string = lzw_decompress(lzw_compressed_data)
 
     end_time = time.time()
-    decompression_time = (end_time - start_time) * 1000
+    decompression_time = (end_time - start_time) 
     psnr = calculate_psnr(original_bit_string, decompressed_image_bit_string)
 
     return decompressed_image_bit_string, decompression_time, psnr

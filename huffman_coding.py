@@ -82,7 +82,7 @@ def compress(image_bit_string):
     compressed_image_bit_string = get_compressed_image(image_bit_string)
 
     end_time = time.time()  # End measuring time
-    compression_time = (end_time - start_time) * 1000
+    compression_time = (end_time - start_time) 
 
     # Step 6: Compute size details
     original_size = len(image_bit_string)  # in bits
@@ -115,6 +115,6 @@ def decompress(compressed_image_bit_string, original_bit_string):
             current_code = ''
     decompressed_image_bit_string = ''.join(decompressed_image_bit_string)
     end_time = time.time()
-    decompression_time = (end_time - start_time) * 1000
+    decompression_time = (end_time - start_time) 
     psnr = calculate_psnr(original_bit_string, decompressed_image_bit_string)
     return decompressed_image_bit_string, decompression_time, psnr
